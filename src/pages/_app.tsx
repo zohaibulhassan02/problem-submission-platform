@@ -9,7 +9,7 @@ export default function App({ Component, pageProps }: AppProps) {
   return (
     <RecoilRoot>
       <Head>
-        <title>LeetCode Clone</title>
+        <title>DevBox</title>
         <meta
           name="description"
           content="Web application that contains LeetCode problems and video solutions"

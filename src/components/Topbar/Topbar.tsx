@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 import logo from "../../../public/logo.png";
+import logofull from '../../../public/logo-full.png'
 import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "@/firebase/firebase";
 import profileImg from "../../../public/avatar.png";
@@ -56,7 +57,8 @@ const Topbar: React.FC<TopbarProps> = ({ problemPage }) => {
         }`}
       >
         <Link href="/" className="h-[22px] flex-1">
-          <Image src={logo} alt="logo" height={100} width={100} />
+          {/* <Image src={logo} alt="logo" height={100} width={100} /> */}
+          <Image src={logofull} className="h-[40px] w-auto" alt="logo" priority />
         </Link>
 
         {problemPage && (

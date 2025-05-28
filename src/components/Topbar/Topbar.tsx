@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 import logo from "../../../public/logo.png";
-import logofull from '../../../public/logo-full.png'
+import logofull from "../../../public/logo-full.png";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "@/firebase/firebase";
 import profileImg from "../../../public/avatar.png";
@@ -58,7 +58,12 @@ const Topbar: React.FC<TopbarProps> = ({ problemPage }) => {
       >
         <Link href="/" className="h-[22px] flex-1">
           {/* <Image src={logo} alt="logo" height={100} width={100} /> */}
-          <Image src={logofull} className="h-[40px] w-auto" alt="logo" priority />
+          <Image
+            src={logofull}
+            className="h-[40px] w-auto"
+            alt="logo"
+            priority
+          />
         </Link>
 
         {problemPage && (
@@ -116,21 +121,25 @@ const Topbar: React.FC<TopbarProps> = ({ problemPage }) => {
           )}
           {user && problemPage && <Timer />}
           {user && (
-            <div className="cursor-pointer group relative">
+            <div
+              className="cursor-pointer group relative"
+              onClick={() => router.push("/profile")}
+            >
               <Image
                 src={profileImg}
                 alt="profile-img"
                 className="h-8 w-8 rounded-full"
               />
               <div
-                className="absolute top-10 left-2/4 -translate-x-2/4  mx-auto bg-dark-layer-1 text-brand-orange p-2 rounded shadow-lg 
-								z-40 group-hover:scale-100 scale-0 
-								transition-all duration-300 ease-in-out"
+                className="absolute top-10 left-2/4 -translate-x-2/4 mx-auto bg-dark-layer-1 text-brand-orange p-2 rounded shadow-lg 
+        z-40 group-hover:scale-100 scale-0 
+        transition-all duration-300 ease-in-out"
               >
                 <p className="text-sm">{user.email}</p>
               </div>
             </div>
           )}
+
           {user && <Logout />}
         </div>
       </div>

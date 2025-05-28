@@ -30,6 +30,7 @@ module.exports = {
         olive: "rgb(0, 184, 163)",
         "dark-green-s": "rgb(44 187 93)",
         "dark-blue-s": "rgb(10 132 255)",
+        "light-green": "rgb(40, 58, 46)"
       },
     },
   },

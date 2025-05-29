@@ -16,7 +16,7 @@ import { auth, firestore } from "@/firebase/firebase";
 import { toast } from "react-toastify";
 import { problems } from "@/utils/problems";
 import { useRouter } from "next/router";
-import { arrayUnion, doc, updateDoc } from "firebase/firestore";
+import { arrayUnion, doc, updateDoc, increment } from "firebase/firestore";
 import useLocalStorage from "@/hooks/useLocalStorage";
 
 type PlaygroundProps = {
@@ -79,8 +79,14 @@ const Playground: React.FC<PlaygroundProps> = ({
           }, 4000);
 
           const userRef = doc(firestore, "users", user.uid);
+          const today = new Date().toISOString().split("T")[0];
           await updateDoc(userRef, {
             solvedProblems: arrayUnion(pid),
+            submissions: arrayUnion({
+              pid: pid,
+              date: today,
+            }),
+            [`submissionCounts.${today}`]: increment(1),
           });
           setSolved(true);
         }

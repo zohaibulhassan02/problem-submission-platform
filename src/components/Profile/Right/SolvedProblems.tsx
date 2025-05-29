@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { firestore } from "@/firebase/firebase"; // your firebase config
 import { doc, getDoc } from "firebase/firestore";
-import { useRouter } from "next/router";
-import { useAuthState } from "react-firebase-hooks/auth";
 
 type Problem = {
   id: string;

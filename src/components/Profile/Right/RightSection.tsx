@@ -4,6 +4,7 @@ import SolvedProblems from "./SolvedProblems";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { useRouter } from "next/router";
 import { auth } from "@/firebase/firebase";
+import Heatmap from "./Heatmap";
 // import ActivityHeatmap from "@/components/ActivityHeatmap"; // use your heatmap component here
 
 const RightSection = () => {
@@ -20,7 +21,7 @@ const RightSection = () => {
       <SolvedProblems uid={user.uid} />
       <div className="mt-6">
         <h3 className="text-lg font-semibold mb-2">Submission Activity</h3>
-        {/* <ActivityHeatmap /> */}
+        <Heatmap />
       </div>
     </div>
   );

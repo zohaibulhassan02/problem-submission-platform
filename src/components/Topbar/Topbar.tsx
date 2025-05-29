@@ -1,8 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
-import logo from "../../../public/logo.png";
-import logofull from "../../../public/logo-full.png";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "@/firebase/firebase";
 import profileImg from "../../../public/avatar.png";
@@ -11,6 +9,8 @@ import { useSetRecoilState } from "recoil";
 import { authModalState } from "@/atoms/authModalAtom";
 import { FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import { BsList } from "react-icons/bs";
+import { doc, getDoc } from "firebase/firestore";
+import { firestore } from "@/firebase/firebase";
 
 import Timer from "../Timer/Timer";
 import { useRouter } from "next/router";
@@ -26,10 +26,30 @@ const Topbar: React.FC<TopbarProps> = ({ problemPage }) => {
   const setAuthModalState = useSetRecoilState(authModalState);
   const router = useRouter();
 
+  const [profileImageUrl, setProfileImageUrl] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    const fetchProfileImage = async () => {
+      if (!user) return;
+      try {
+        const docRef = doc(firestore, "users", user.uid);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          setProfileImageUrl(data.profileImageUrl || null);
+        }
+      } catch (err) {
+        console.error("Error fetching user profile:", err);
+      }
+    };
+    fetchProfileImage();
+  }, [user]);
+
   const handleProblemChange = (isForward: boolean) => {
     const { order } = problems[router.query.pid as string] as Problem;
     const direction = isForward ? 1 : -1;
     const nextProblemOrder = order + direction;
+
     const nextProblemKey = Object.keys(problems).find(
       (key) => problems[key].order === nextProblemOrder
     );
@@ -51,21 +71,11 @@ const Topbar: React.FC<TopbarProps> = ({ problemPage }) => {
 
   return (
     <nav className="relative flex h-[70px] w-full shrink-0 items-center px-5 bg-dark-layer-1 text-dark-gray-7">
-      <div
-        className={`flex w-full items-center justify-between ${
-          !problemPage ? "max-w-[1200px] mx-auto" : ""
-        }`}
-      >
-        <Link href="/" className="h-[22px] flex-1">
-          {/* <Image src={logo} alt="logo" height={100} width={100} /> */}
-          <Image
-            src={logofull}
-            className="h-[40px] w-auto"
-            alt="logo"
-            priority
-          />
-        </Link>
+      <div className={`flex w-full items-center justify-between ${!problemPage ? "max-w-[1200px] mx-auto" : ""}`}>
+        {/* Left Section - Removed profile image, leaving empty flex space */}
+        <div className="flex-1" />
 
+        {/* Problem Navigation Section */}
         {problemPage && (
           <div className="flex items-center gap-4 flex-1 justify-center">
             <div
@@ -78,9 +88,7 @@ const Topbar: React.FC<TopbarProps> = ({ problemPage }) => {
               href="/"
               className="flex items-center gap-2 font-medium max-w-[170px] text-dark-gray-8 cursor-pointer"
             >
-              <div>
-                <BsList />
-              </div>
+              <BsList />
               <p>Problem List</p>
             </Link>
             <div
@@ -92,17 +100,17 @@ const Topbar: React.FC<TopbarProps> = ({ problemPage }) => {
           </div>
         )}
 
+        {/* Right Section */}
         <div className="flex items-center space-x-4 flex-1 justify-end">
-          <div>
-            <a
-              href=""
-              target="_blank"
-              rel="norefferer"
-              className="bg-dark-fill-3 py-1.5 px-3 cursor-pointer rounded text-brand-orange hover:bg-dark-fill"
-            >
-              Premium
-            </a>
-          </div>
+          <a
+            href=""
+            target="_blank"
+            rel="noreferrer"
+            className="bg-dark-fill-3 py-1.5 px-3 cursor-pointer rounded text-brand-orange hover:bg-dark-fill"
+          >
+            Premium
+          </a>
+
           {!user && (
             <Link
               href="/auth"
@@ -119,22 +127,22 @@ const Topbar: React.FC<TopbarProps> = ({ problemPage }) => {
               </button>
             </Link>
           )}
+
           {user && problemPage && <Timer />}
+
           {user && (
             <div
               className="cursor-pointer group relative"
               onClick={() => router.push("/profile")}
             >
               <Image
-                src={profileImg}
+                src={profileImageUrl || profileImg}
                 alt="profile-img"
                 className="h-8 w-8 rounded-full"
+                width={32}
+                height={32}
               />
-              <div
-                className="absolute top-10 left-2/4 -translate-x-2/4 mx-auto bg-dark-layer-1 text-brand-orange p-2 rounded shadow-lg 
-        z-40 group-hover:scale-100 scale-0 
-        transition-all duration-300 ease-in-out"
-              >
+              <div className="absolute top-10 left-2/4 -translate-x-2/4 mx-auto bg-dark-layer-1 text-brand-orange p-2 rounded shadow-lg z-40 group-hover:scale-100 scale-0 transition-all duration-300 ease-in-out">
                 <p className="text-sm">{user.email}</p>
               </div>
             </div>
@@ -146,4 +154,5 @@ const Topbar: React.FC<TopbarProps> = ({ problemPage }) => {
     </nav>
   );
 };
+
 export default Topbar;

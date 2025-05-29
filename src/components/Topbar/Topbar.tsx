@@ -26,7 +26,9 @@ const Topbar: React.FC<TopbarProps> = ({ problemPage }) => {
   const setAuthModalState = useSetRecoilState(authModalState);
   const router = useRouter();
 
-  const [profileImageUrl, setProfileImageUrl] = React.useState<string | null>(null);
+  const [profileImageUrl, setProfileImageUrl] = React.useState<string | null>(
+    null
+  );
 
   React.useEffect(() => {
     const fetchProfileImage = async () => {
@@ -71,9 +73,25 @@ const Topbar: React.FC<TopbarProps> = ({ problemPage }) => {
 
   return (
     <nav className="relative flex h-[70px] w-full shrink-0 items-center px-5 bg-dark-layer-1 text-dark-gray-7">
-      <div className={`flex w-full items-center justify-between ${!problemPage ? "max-w-[1200px] mx-auto" : ""}`}>
+      <div
+        className={`flex w-full items-center justify-between ${
+          !problemPage ? "max-w-[1200px] mx-auto" : ""
+        }`}
+      >
         {/* Left Section - Removed profile image, leaving empty flex space */}
-        <div className="flex-1" />
+        {/* <Link href="/" className="h-[22px] flex-1">
+          <Image src="/logo-full.png" alt="Logo" height={100} width={100} />
+        </Link> */}
+
+        <Link href="/" className="h-auto flex items-center">
+          <Image
+            src="/logo-full.png"
+            alt="Logo"
+            width={180}
+            height={60}
+            className="object-contain"
+          />
+        </Link>
 
         {/* Problem Navigation Section */}
         {problemPage && (

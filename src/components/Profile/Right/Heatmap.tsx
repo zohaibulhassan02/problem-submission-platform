@@ -6,7 +6,6 @@ import { doc, getDoc } from "firebase/firestore";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { Tooltip } from "react-tooltip";
 import "react-tooltip/dist/react-tooltip.css";
-// Removed the CSS file import since Tailwind is used
 
 const Heatmap: React.FC = () => {
   const [user] = useAuthState(auth);
@@ -27,8 +26,7 @@ const Heatmap: React.FC = () => {
         const dateMap: Record<string, number> = {};
 
         submissions.forEach((sub) => {
-          if (!dateMap[sub.date]) dateMap[sub.date] = 0;
-          dateMap[sub.date]++;
+          dateMap[sub.date] = (dateMap[sub.date] || 0) + 1;
         });
 
         const heatmapData = Object.entries(dateMap).map(([date, count]) => ({
@@ -58,9 +56,13 @@ const Heatmap: React.FC = () => {
           if (value.count === 2) return "fill-color-github-2";
           return "fill-color-github-1";
         }}
-        tooltipDataAttrs={(value) => {
-          if (!value || typeof value !== "object" || !("date" in value))
-            return {};
+        tooltipDataAttrs={(value): Record<string, string> => {
+          if (!value || typeof value !== "object" || !("date" in value)) {
+            return {
+              "data-tooltip-id": "",
+              "data-tooltip-content": "",
+            };
+          }
           const val = value as { date: string; count: number };
           return {
             "data-tooltip-id": "heatmap-tooltip",

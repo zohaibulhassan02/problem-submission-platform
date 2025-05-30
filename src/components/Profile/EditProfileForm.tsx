@@ -31,6 +31,7 @@ const EditProfileForm = ({ uid }: { uid: string }) => {
 
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
 
   const router = useRouter();
 
@@ -81,6 +82,7 @@ const EditProfileForm = ({ uid }: { uid: string }) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSaving(true);
 
     try {
       const docRef = doc(firestore, "users", uid);
@@ -88,6 +90,7 @@ const EditProfileForm = ({ uid }: { uid: string }) => {
 
       if (!docSnap.exists()) {
         toast.error("User data not found.");
+        setIsSaving(false);
         return;
       }
 
@@ -129,6 +132,7 @@ const EditProfileForm = ({ uid }: { uid: string }) => {
         } catch (uploadErr) {
           toast.error("Image upload failed.");
           console.error("Cloudinary Upload Error:", uploadErr);
+          setIsSaving(false);
           return;
         }
       }
@@ -149,6 +153,7 @@ const EditProfileForm = ({ uid }: { uid: string }) => {
 
       if (Object.keys(changedFields).length === 0) {
         toast.info("No changes detected.");
+        setIsSaving(false);
         return;
       }
 
@@ -167,7 +172,13 @@ const EditProfileForm = ({ uid }: { uid: string }) => {
         theme: "dark",
       });
       console.error("Update error:", err);
+    } finally {
+      setIsSaving(false);
     }
+  };
+
+  const handleClose = () => {
+    router.push("/profile");
   };
 
   return (
@@ -175,7 +186,16 @@ const EditProfileForm = ({ uid }: { uid: string }) => {
       onSubmit={handleSubmit}
       className="max-w-xl mx-auto p-6 space-y-4 bg-gray-900 rounded-xl text-white"
     >
-      <h2 className="text-xl font-bold">Edit Profile</h2>
+      <div className="flex justify-between items-center">
+        <h2 className="text-xl font-bold">Edit Profile</h2>
+        <button
+          type="button"
+          onClick={handleClose}
+          className="text-sm text-red-400 hover:text-red-600"
+        >
+          ✕ Close
+        </button>
+      </div>
 
       {/* Profile Image Upload */}
       <div>
@@ -240,8 +260,9 @@ const EditProfileForm = ({ uid }: { uid: string }) => {
       <button
         type="submit"
         className="bg-green-600 hover:bg-green-700 px-6 py-2 rounded text-white"
+        disabled={isSaving}
       >
-        Save Changes
+        {isSaving ? "Saving..." : "Save Changes"}
       </button>
     </form>
   );

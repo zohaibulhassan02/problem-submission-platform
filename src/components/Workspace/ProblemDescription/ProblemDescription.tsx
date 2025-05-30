@@ -119,57 +119,87 @@ const ProblemDescription: React.FC<ProblemDescriptionProps> = ({
       });
       return;
     }
+
     if (updating) return;
     setUpdating(true);
-    await runTransaction(firestore, async (transaction) => {
-      const { problemDoc, userDoc, problemRef, userRef } =
-        await returnUserDataAndProblemData(transaction);
-      if (userDoc.exists() && problemDoc.exists()) {
-        // already disliked, already liked, not disliked or liked
-        if (disliked) {
-          transaction.update(userRef, {
-            dislikedProblems: userDoc
-              .data()
-              .dislikedProblems.filter((id: string) => id !== problem.id),
-          });
-          transaction.update(problemRef, {
-            dislikes: problemDoc.data().dislikes - 1,
-          });
-          setCurrentProblem((prev) =>
-            prev ? { ...prev, dislikes: prev.dislikes - 1 } : null
-          );
-          setData((prev) => ({ ...prev, disliked: false }));
-        } else if (liked) {
-          transaction.update(userRef, {
-            dislikedProblems: [...userDoc.data().dislikedProblems, problem.id],
-            likedProblems: userDoc
-              .data()
-              .likedProblems.filter((id: string) => id !== problem.id),
-          });
-          transaction.update(problemRef, {
-            dislikes: problemDoc.data().dislikes + 1,
-            likes: problemDoc.data().likes - 1,
-          });
-          setCurrentProblem((prev) =>
-            prev
-              ? { ...prev, dislikes: prev.dislikes + 1, likes: prev.likes - 1 }
-              : null
-          );
-          setData((prev) => ({ ...prev, disliked: true, liked: false }));
-        } else {
-          transaction.update(userRef, {
-            dislikedProblems: [...userDoc.data().dislikedProblems, problem.id],
-          });
-          transaction.update(problemRef, {
-            dislikes: problemDoc.data().dislikes + 1,
-          });
-          setCurrentProblem((prev) =>
-            prev ? { ...prev, dislikes: prev.dislikes + 1 } : null
-          );
-          setData((prev) => ({ ...prev, disliked: true }));
+
+    try {
+      await runTransaction(firestore, async (transaction) => {
+        const { problemDoc, userDoc, problemRef, userRef } =
+          await returnUserDataAndProblemData(transaction);
+
+        if (userDoc.exists() && problemDoc.exists()) {
+          const userData = userDoc.data();
+          const problemData = problemDoc.data();
+
+          const currentDislikes = problemData.dislikes || 0;
+          const currentLikes = problemData.likes || 0;
+
+          // Case 1: Already disliked - remove dislike
+          if (disliked) {
+            transaction.update(userRef, {
+              dislikedProblems: userData.dislikedProblems.filter(
+                (id: string) => id !== problem.id
+              ),
+            });
+            transaction.update(problemRef, {
+              dislikes: Math.max(currentDislikes - 1, 0),
+            });
+            setCurrentProblem((prev) =>
+              prev
+                ? { ...prev, dislikes: Math.max(prev.dislikes - 1, 0) }
+                : null
+            );
+            setData((prev) => ({ ...prev, disliked: false }));
+          }
+
+          // Case 2: Liked before, now switching to dislike
+          else if (liked) {
+            transaction.update(userRef, {
+              dislikedProblems: [...userData.dislikedProblems, problem.id],
+              likedProblems: userData.likedProblems.filter(
+                (id: string) => id !== problem.id
+              ),
+            });
+            transaction.update(problemRef, {
+              dislikes: currentDislikes + 1,
+              likes: Math.max(currentLikes - 1, 0),
+            });
+            setCurrentProblem((prev) =>
+              prev
+                ? {
+                    ...prev,
+                    dislikes: prev.dislikes + 1,
+                    likes: Math.max(prev.likes - 1, 0),
+                  }
+                : null
+            );
+            setData((prev) => ({ ...prev, disliked: true, liked: false }));
+          }
+
+          // Case 3: Neutral — add dislike
+          else {
+            transaction.update(userRef, {
+              dislikedProblems: [...userData.dislikedProblems, problem.id],
+            });
+            transaction.update(problemRef, {
+              dislikes: currentDislikes + 1,
+            });
+            setCurrentProblem((prev) =>
+              prev ? { ...prev, dislikes: prev.dislikes + 1 } : null
+            );
+            setData((prev) => ({ ...prev, disliked: true }));
+          }
         }
-      }
-    });
+      });
+    } catch (error) {
+      console.error("Dislike transaction failed:", error);
+      toast.error("Something went wrong. Please try again later.", {
+        position: "top-left",
+        theme: "dark",
+      });
+    }
+
     setUpdating(false);
   };
 

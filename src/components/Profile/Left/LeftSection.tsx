@@ -1,7 +1,7 @@
 // components/Profile/Left/LeftSection.tsx
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
-import profileImg from "../../../../public/profile-img.png";
+import profileImg from "../../../../public/avatar.png";
 import {
   FaMapMarkerAlt,
   FaUniversity,
